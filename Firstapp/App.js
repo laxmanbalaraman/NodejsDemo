@@ -1,6 +1,10 @@
 // console.log("Hello World");
 
-// import a module
-const logger = require("./logger");
+const Logger = require("./Logger");
+const logger = new Logger();
 
-logger.log("Hello World from app.js using module in logger.js");
+logger.on("messageLogged", (arg) => {
+  console.log("Listener called", arg);
+});
+
+logger.log("message");
