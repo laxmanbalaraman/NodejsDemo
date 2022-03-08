@@ -1,9 +1,12 @@
+const logger = require("./logger");
 const Joi = require("joi");
 const express = require("express");
 const app = express();
 
 // parse json
 app.use(express.json());
+
+app.use(logger);
 
 const courses = [
   { id: 1, name: "course1" },
@@ -16,7 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/courses", (req, res) => {
-  res.send([1, 2, 3]);
+  res.send(courses);
 });
 
 // params when madatory info is needed from client
@@ -28,17 +31,14 @@ app.get("/api/courses/:id", (req, res) => {
   );
 
   if (!course)
-    res.status(404).send("Course with the given course id not found");
+    return res.status(404).send("Course with the given course id not found");
   res.send(course);
 });
 
 app.post("/api/courses", (req, res) => {
   // console.log(result);
   const error = inputValidate(req.body);
-  if (error) {
-    res.status(400).send(error.details[0].message);
-    return;
-  }
+  if (error) return res.status(400).send(error.details[0].message);
   const course = {
     id: courses.length + 1,
     name: req.body.name,
@@ -52,15 +52,25 @@ app.put("/api/courses/:id", (req, res) => {
     (course) => course.id === parseInt(req.params.id)
   );
   if (!course)
-    res.status(404).send("Course with the given course id not found");
+    return res.status(404).send("Course with the given course id not found");
 
   const error = inputValidate(req.body);
-  if (error) {
-    res.status(400).send(error.details[0].message);
-    return;
-  }
+  if (error) return res.status(400).send(error.details[0].message);
 
   course.name = req.body.name;
+  res.send(course);
+});
+
+app.delete("/api/courses/:id", (req, res) => {
+  const course = courses.find(
+    (course) => course.id === parseInt(req.params.id)
+  );
+  if (!course)
+    return res.status(404).send("Course with the given course id not found");
+
+  const index = courses.indexOf(course);
+  courses.splice(index, 1);
+
   res.send(course);
 });
 
